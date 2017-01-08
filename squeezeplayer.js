@@ -176,6 +176,12 @@ function SqueezePlayer(playerId, name, address, port) {
     this.insertToPlaylist = function (item, callback) {
         this.request(playerId, ["playlist", "insert", item], callback);
     };
+    
+    //Function to set Linein mode on Squeezebox Boom
+    this.setLinein = function(callback){
+        this.request(playerId, ["setlinein", "linein"], callback);  
+    };
+    
 }
 
 inherits(SqueezePlayer, SqueezeRequest);
