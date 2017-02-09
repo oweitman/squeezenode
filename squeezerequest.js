@@ -34,7 +34,12 @@ function SqueezeRequest(address, port, username, password) {
     this.username = username;
     this.password = password;
     var jsonrpc = this.address + ':' + this.port + '/jsonrpc.js';
-    var client = jayson.client.http(jsonrpc);
+    var client;
+    if (this.address.substr(0,5) === 'https') {
+      client = jayson.client.https(jsonrpc);
+    } else {
+      client = jayson.client.http(jsonrpc);
+    }
     client.options.version = 1;
     this.queue = [];
     this.id = "squeezenode."+process.pid;// FIXME lamba seems to be 1 always add instance?
