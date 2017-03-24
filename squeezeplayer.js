@@ -22,15 +22,82 @@
  SOFTWARE.
  */
 
+var _ = require('lodash');
 var inherits = require('super');
 var SqueezeRequest = require('./squeezerequest');
 
 function SqueezePlayer(playerId, name, address, port, username, password) {
-
     this.playerId = playerId;
     this.name = name;
 
     SqueezePlayer.super_.apply(this, [address, port, username, password]);
+
+    /**
+     * @method callMethod
+     *
+     * You can use this function to call any available method in the Logitech
+     * Media Server API. The documentation for the API can be found here -
+     * `http://<your-server-ip>:9000/html/docs/help.html`
+     *
+     * ...then click on "Technical Information"
+     * ...then click on "The Logitech Media Server Command Line Interface"
+     *
+     * (God, they don't make it easy...)
+     *
+     * You can then use `callMethod` for anything, like so,
+     * @example
+     * squeezePlayer.callMethod({
+     *     playerId: myplayerId,
+     *     method: 'mixer',
+     *     params: ['volume', '?'],
+     *     callback: myCallbackFunction
+     * });
+     *
+     * While `callMethod` can be used to execute any of the LMS API methods, the additional
+     * functions below (e.g `play`, `clearPlayist`, etc) may be more convenient and easier
+     * to remember. Use whichever you prefer. `callMethod` is designed to provide flexibility
+     * for calling methods that have not been explicitly defined on the SqueezePlayer
+     * object. Plus, it supports promises! 🙀
+     *
+     * @param Object opts - The options object for the request.
+     * @param string opts.method - The method name. Required.
+     * @param array opts.params - The additional parameters for the request. Required.
+     * @param function [opts.callback] - The callback function. Optional. If you don't
+     *                                   provide a callback, a promise will be returned.
+     * @throws Throws an error is opts.method is empty.
+     * @returns Promise|Undefined
+     *
+     */
+    this.callMethod = function(opts) {
+        if (_.isUndefined(opts.method)) {
+            throw Error('Method name missing.');
+        }
+
+        var params = _.flatten([
+            _.get(opts, 'method'),
+            _.get(opts, 'params'),
+        ]);
+
+        var cb = _.get(opts, 'callback');
+
+        if (cb) {
+            this.request(this.playerId, params, cb);
+        } else {
+            return new Promise(_.bind(function(resolve, reject) {
+                this.request(
+                    this.playerId,
+                    params,
+                    function(result) {
+                        if (!result.ok) {
+                            reject(result);
+                        } else {
+                            resolve(result);
+                        }
+                    }
+                );
+            }, this));
+        }
+    };
 
     this.clearPlayList = function (callback) {
         this.request(playerId, ["playlist", "clear"], callback);
@@ -105,7 +172,6 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
     };
 
     this.playIndex = function (index, callback) {
-        console.log("index: " + index);
         this.request(playerId, ["playlist", "index", index], callback);
     };
 
