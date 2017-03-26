@@ -81,6 +81,22 @@ function SqueezeServer(address, port, username, password) {
         });
     };
 
+    /**
+     * Get a list of the genre's from the server
+     *
+     * @param callback The callback to call with the result
+     * @param limit The maximum number of results
+     */
+
+    this.getGenres = function (callback, limit) {
+
+        self.request(defaultPlayer, ["genres", 0, limit], function (reply) {
+            if (reply.ok)
+                reply.result = reply.result.genres_loop;
+            callback(reply);
+        })
+    };
+
     function register() {
 
         self.getPlayers(function (reply) { //TODO refactor this
