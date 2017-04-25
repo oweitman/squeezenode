@@ -82,6 +82,38 @@ function SqueezeServer(address, port, username, password) {
     };
 
     /**
+     * Get a list of the artists from the server
+     *
+     * @param callback The callback to call with the result
+     * @param limit The maximum number of results
+     */
+
+    this.getArtists = function (callback, limit) {
+
+        self.request(defaultPlayer, ["artists", 0, limit], function (reply) {
+            if (reply.ok)
+                reply.result = reply.result.artists_loop;
+            callback(reply);
+        })
+    };
+
+    /**
+     * Get a list of the albums from the server
+     *
+     * @param callback The callback to call with the result
+     * @param limit The maximum number of results
+     */
+
+    this.getAlbums = function (callback, limit) {
+
+        self.request(defaultPlayer, ["albums", 0, limit], function (reply) {
+            if (reply.ok)
+                reply.result = reply.result.albums_loop;
+            callback(reply);
+        })
+    };
+
+    /**
      * Get a list of the genre's from the server
      *
      * @param callback The callback to call with the result
