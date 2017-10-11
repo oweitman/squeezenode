@@ -47,14 +47,14 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * You can then use `callMethod` for anything, like so,
      * @example
      * squeezePlayer.callMethod({
-     *     playerId: myplayerId,
+     *     playerId: myPlayerId,
      *     method: 'mixer',
      *     params: ['volume', '?'],
      *     callback: myCallbackFunction
      * });
      *
      * While `callMethod` can be used to execute any of the LMS API methods, the additional
-     * functions below (e.g `play`, `clearPlayist`, etc) may be more convenient and easier
+     * functions below (e.g `play`, `clearPlayList`, etc) may be more convenient and easier
      * to remember. Use whichever you prefer. `callMethod` is designed to provide flexibility
      * for calling methods that have not been explicitly defined on the SqueezePlayer
      * object. Plus, it supports promises! 🙀
