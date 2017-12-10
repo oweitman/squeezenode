@@ -176,11 +176,11 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
     };
 
     this.pause = function(callback) {
-        this.request(playerId, ["pause 1"], callback);
+        this.request(playerId, ["pause", "1"], callback);
     };
 
     this.resume = function(callback) {
-        this.request(playerId, ["pause 0"], callback);
+        this.request(playerId, ["pause", "0"], callback);
     };
 
     this.previous = function(callback) {
