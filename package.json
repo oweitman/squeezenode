@@ -1,7 +1,7 @@
 {
   "name": "squeezenode-pssc",
   "author": "Piotr Raczynski <pio[dot]raczynski[at]gmail[dot]com>",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Node.js wrapper library for squeezebox CLI/json interface with Spotify/SoundCloud support",
   "main": "server.js",
   "keywords": [
@@ -15,10 +15,8 @@
     "home automation"
   ],
   "dependencies": {
-//    "celeri": "git+https://github.com/crcn-archive/celeri.git",
     "jayson": "^1.1.3",
     "lodash": "^4.17.4",
-//    "nomnom": "^1.8.1",
     "request": "2.51.0",
     "super": "^0.2.3"
   },
