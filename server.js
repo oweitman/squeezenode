@@ -98,7 +98,7 @@ function SqueezeServer(address, port, username, password) {
     };
 
     function register() {
-
+	console.info("register");
         self.getPlayers(function (reply) { //TODO refactor this
             var players = reply.result;
             for (var pl in players) {
@@ -110,6 +110,7 @@ function SqueezeServer(address, port, username, password) {
         });
 
         self.on('registerPlayers', function () {
+	console.info("registerPlayers");
             self.getApps(function (reply) { //TODO refactor this
                 if (reply.ok) {
                     var apps = reply.result.appss_loop;
@@ -134,6 +135,7 @@ function SqueezeServer(address, port, username, password) {
     }
 
     register();
+    console.info("SqueezeServer End");
 }
 
 inherits(SqueezeServer, SqueezeRequest);

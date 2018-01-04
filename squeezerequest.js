@@ -56,12 +56,12 @@ function SqueezeRequest(address, port, username, password) {
 
     if (port == 'aws') {
         AWS = require('aws-sdk');
-	console.info('aws');
 	this.request = request_sqs;
 	this.sqs = new AWS.SQS({region: 'us-west-2'});
 	this.sendq = { QueueUrl: password.send, MessageGroupId: this.id };
 	this.recvq = { QueueUrl: password.recv, WaitTimeSeconds: 0, MaxNumberOfMessages: 10};
 	this.reciving = true
+	console.info('aws');
 	this.sqs.receiveMessage(that.recvq, function (err, reply) {
 		that.recvq.MaxNumberOfMessages = 1;
 		that.recvq.WaitTimeSeconds = 20;
