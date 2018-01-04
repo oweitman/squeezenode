@@ -56,7 +56,7 @@ function SqueezeRequest(address, port, username, password) {
 
     if (port == 'aws') {
         AWS = require('aws-sdk');
-	console.debug('aws');
+	console.info('aws');
 	this.request = request_sqs;
 	this.sqs = new AWS.SQS({region: 'us-west-2'});
 	this.sendq = { QueueUrl: password.send, MessageGroupId: this.id };
