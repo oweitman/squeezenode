@@ -56,6 +56,7 @@ function SqueezeRequest(address, port, username, password) {
 
     if (port == 'aws') {
         AWS = require('aws-sdk');
+	console.debug('aws')
 	this.request = request_sqs;
 	this.sqs = new AWS.SQS({region: 'us-west-2'});
 	this.sendq = { QueueUrl: password.send, MessageGroupId: this.id };
@@ -101,7 +102,7 @@ function SqueezeRequest(address, port, username, password) {
 	that.sqs.sendMessage(that.sendq, function(err, data) {
 		  if (err) {
 			handle(err, data, callback);
-			//console.log("send error ",err);
+			console.error("send error ",err);
 		  } else {
 			// successful response - callback for reply
 			that.reciving = true;
@@ -123,7 +124,7 @@ function SqueezeRequest(address, port, username, password) {
 						// FIXME delete error
 						that.sqs.deleteMessage(deleteParams, function(err, data) {
 							if (err) {
-								//console.log("Delete Error", err);
+								console.error("Delete Error", err);
 							} else {
 								//console.log("Message Deleted", data);
 							}
@@ -131,7 +132,7 @@ function SqueezeRequest(address, port, username, password) {
 						msg = reply.Messages.pop();
 					}
 				} else {
-					//console.dir("no msgs ",err);
+					//console.warn("no msgs ",err);
 					err = "No reply message recvied";
 				}
 				handle(err, message_data, callback);
