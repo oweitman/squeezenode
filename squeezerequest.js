@@ -37,7 +37,7 @@ function SqueezeRequest(address, port, username, password) {
     var client = jayson.client.http(jsonrpc);
     client.options.version = 1;
     this.queue = [];
-    this.id = "squeezenode."+process.pid;
+    this.id = "squeezenode."+process.pid;// FIXME lamba seems to be 1 always add instance?
     var that = this;
 
     function handle(err, reply, callback) {
@@ -61,7 +61,6 @@ function SqueezeRequest(address, port, username, password) {
 	this.sendq = { QueueUrl: password.send, MessageGroupId: this.id };
 	this.recvq = { QueueUrl: password.recv, WaitTimeSeconds: 0, MaxNumberOfMessages: 10};
 	this.reciving = true
-	console.info('aws');
 	this.sqs.receiveMessage(that.recvq, function (err, reply) {
 		that.recvq.MaxNumberOfMessages = 1;
 		that.recvq.WaitTimeSeconds = 20;
@@ -102,7 +101,7 @@ function SqueezeRequest(address, port, username, password) {
 	that.sqs.sendMessage(that.sendq, function(err, data) {
 		  if (err) {
 			handle(err, data, callback);
-			console.error("send error ",err);
+			console.error("Send Error ",err);
 		  } else {
 			// successful response - callback for reply
 			that.reciving = true;
@@ -132,7 +131,7 @@ function SqueezeRequest(address, port, username, password) {
 						msg = reply.Messages.pop();
 					}
 				} else {
-					//console.warn("no msgs ",err);
+					console.warn("no msgs ",err);
 					err = "No reply message recvied";
 				}
 				handle(err, message_data, callback);
