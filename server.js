@@ -27,7 +27,7 @@ var fs = require('fs');
 var SqueezeRequest = require('./squeezerequest');
 var SqueezePlayer = require('./squeezeplayer');
 
-function SqueezeServer(address, port, username, password) {
+function SqueezeServer(address, port, username, password, sa) {
 
     SqueezeServer.super_.apply(this, arguments);
     var defaultPlayer = "00:00:00:00:00:00";
@@ -97,7 +97,7 @@ function SqueezeServer(address, port, username, password) {
         })
     };
 
-    function register() {
+    function register(skipApps) {
         self.getPlayers(function (reply) { //TODO refactor this
             var players = reply.result;
             for (var pl in players) {
@@ -105,13 +105,17 @@ function SqueezeServer(address, port, username, password) {
                     self.players[players[pl].playerid] = new SqueezePlayer(players[pl].playerid, players[pl].name, self.address, self.port, self.username, self.password);
                 }
             }
-            self.emit('registerPlayers');
+	    if (skipApps) {
+                self.emit('register',reply,undefined);
+            } else {
+                self.emit('registerPlayers',reply);
+	   }
         });
 
-        self.on('registerPlayers', function () {
-            self.getApps(function (reply) { //TODO refactor this
-                if (reply.ok) {
-                    var apps = reply.result.appss_loop;
+        self.on('registerPlayers', function (reply) {
+            self.getApps(function (areply) { //TODO refactor this
+                if (areply.ok) {
+                    var apps = areply.result.appss_loop;
                     var dir = __dirname + '/';
                     fs.readdir(dir, function (err, files) {
                         files.forEach(function (file) {
@@ -124,15 +128,15 @@ function SqueezeServer(address, port, username, password) {
                                 }
                             }
                         });
-                        self.emit('register');
+                        self.emit('register',reply,areply);
                     });
                 } else
-                    self.emit('register');
+                    self.emit('register',reply,areply);
             });
         });
     }
 
-    register();
+    register(sa);
 }
 
 inherits(SqueezeServer, SqueezeRequest);
