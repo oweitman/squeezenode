@@ -148,7 +148,7 @@ function SqueezeServer(address, port, username, password, sa) {
         })
     };
 
-    function register() {
+    function register(skipApps) {
 
         self.getPlayers(function(reply) { //TODO refactor this
             var players = reply.result;
