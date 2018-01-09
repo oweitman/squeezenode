@@ -172,7 +172,7 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
     };
 
     this.pause = function(state,callback) {
-        this.request(playerId, ["pause", state ? "1" : "0", callback);
+        this.request(playerId, ["pause", state ? "1" : "0"], callback);
     };
 
     this.togglepause = function(callback) {
@@ -228,7 +228,7 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
     };
 
     this.power = function(state, callback) {
-        this.request(playerId, ["power", callback);
+        this.request(playerId, ["power", state ? "1" : "0"], callback);
     };
 
     this.playFavorite = function (favorite, callback) {
@@ -246,7 +246,7 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
     };
 
     this.shuffle = function(state,callback) {
-        this.request(playerId, ["playlist", "shuffle", state ? "1" : "0" ], callback);
+        this.request(playerId, ["playlist", "shuffle", state ? "1" : "0"], callback);
     };
     
     //Function to set Linein mode on Squeezebox Boom
