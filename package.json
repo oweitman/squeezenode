@@ -12,7 +12,8 @@
     "jsonrpc",
     "remote",
     "smarthome",
-    "home automation"
+    "home automation",
+    "queezy"
   ],
   "devDependencies": {
    "celeri": "git+https://github.com/crcn-archive/celeri.git",

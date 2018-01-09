@@ -1,18 +1,14 @@
 /*
  The MIT License (MIT)
-
  Copyright (c) 2013-2015 Piotr Raczynski, pio[dot]raczynski[at]gmail[dot]com
-
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
-
  The above copyright notice and this permission notice shall be included in all
  copies or substantial portions of the Software.
-
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -230,8 +226,28 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
     this.randomPlay = function(target, callback) {
         this.request(playerId, ["randomplay", target], callback);
     };
+
     this.power = function(state, callback) {
         this.request(playerId, ["power", state], callback);
+    };
+
+    this.playFavorite = function (favorite, callback) {
+        this.request(playerId, ["favorites", "playlist", "play", "item_id:" + favorite], callback);
+    };
+
+    //to append song url (path)/playlist or directory content to end of the playlist
+    this.addToPlaylist = function (item, callback) {
+        this.request(playerId, ["playlist", "add", item], callback);
+    };
+
+    //to insert song url (path)/playlist or directory content after currently playing track
+    this.insertToPlaylist = function (item, callback) {
+        this.request(playerId, ["playlist", "insert", item], callback);
+    };
+    
+    //Function to set Linein mode on Squeezebox Boom
+    this.setLinein = function(callback){
+        this.request(playerId, ["setlinein", "linein"], callback);  
     };
 }
 
