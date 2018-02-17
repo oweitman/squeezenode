@@ -102,3 +102,4 @@ squeezenode-lordpengwin
 -----------------------
 * Added suppport for HTTP basic auth
 * Added support for additional commands
+* Merged changes from pssc fork

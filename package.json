@@ -1,6 +1,6 @@
 {
-  "name": "squeezenode-pssc",
-  "author": "Piotr Raczynski <pio[dot]raczynski[at]gmail[dot]com>",
+  "name": "squeezenode-lordpengwin",
+  "author": "Original author: Piotr Raczynski <pio[dot]raczynski[at]gmail[dot]com>",
   "version": "0.1.0",
   "description": "Node.js wrapper library for squeezebox CLI/json interface with Spotify/SoundCloud support",
   "main": "server.js",
@@ -27,6 +27,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pssc/squeezenode.git"
+    "url": "https://github.com/lordpengwin/squeezenode.git"
   }
 }
