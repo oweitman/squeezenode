@@ -1,5 +1,6 @@
 var squeezenode = require('../');
-var celeri = require('celeri');var options = require('./options');
+var celeri = require('celeri');
+var options = require('./options');
 var package = require('./package.json');
 
 console.log(package.name.green + ' by ' + 'Piotr Raczynski'.green);
@@ -20,7 +21,6 @@ function playerIdByName(name, callback) {
     });
 }
 
-squeeze.on('register', function(){
         celeri.option({
             command: 'spotifySearchTracks :query',
             description: 'Performs spotify tracks search'
@@ -238,5 +238,8 @@ squeeze.on('register', function(){
             process.exit(0);
         });
 
-        celeri.open(); /* start interactive shell, type help command for help :)*/
+//        celeri.open(); /* start interactive shell, type help command for help :)*/
+//	celeri.parse(process.argv);
+squeeze.on('register', function(){
+	celeri.open();
 });
