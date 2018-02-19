@@ -9,6 +9,16 @@ var opts = require("nomnom")
         help: 'Logitech Media Server port',
         default: 9000
     })
+    .option('username', {
+        abbr: 'U',
+        help: 'Authentication username',
+        default: ''
+    })
+    .option('password', {
+        abbr: 'P',
+        help: 'Authentication password',
+        default: ''
+    })
     .parse();
 
 module.exports.opts = opts;
