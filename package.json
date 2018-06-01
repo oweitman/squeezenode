@@ -1,8 +1,8 @@
 {
   "name": "squeezenode-pssc",
-  "author": "Piotr Raczynski <pio[dot]raczynski[at]gmail[dot]com>",
-  "version": "0.1.0",
-  "description": "Node.js wrapper library for squeezebox CLI/json interface with Spotify/SoundCloud support",
+  "author": "Piotr Raczynski <pio[dot]raczynski[at]gmail[dot]com> & Others",
+  "version": "0.2.0",
+  "description": "Node.js wrapper library for squeezebox CLI/json/SQS/SSH Tunnled interface with Spotify/SoundCloud support",
   "main": "server.js",
   "keywords": [
     "squeezebox",
