@@ -22,7 +22,19 @@ var _ = require('lodash');
 var inherits = require('super');
 var SqueezeRequest = require('./squeezerequest');
 
+/**
+ * Create a SqueezePlayer object
+ *
+ * @param playerId The ID of the player
+ * @param name The name of the player
+ * @param address The URL of the server
+ * @param port The port that the server listens on
+ * @param username The username for authentication
+ * @param password The password for authentication
+ */
+
 function SqueezePlayer(playerId, name, address, port, username, password) {
+
     this.playerId = playerId;
     this.name = name;
 
@@ -64,7 +76,9 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @returns Promise|Undefined
      *
      */
-    this.callMethod = function(opts) {
+
+    this.callMethod = function (opts) {
+
         if (_.isUndefined(opts.method)) {
             throw Error('Method name missing.');
         }
@@ -79,11 +93,11 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
         if (cb) {
             this.request(this.playerId, params, cb);
         } else {
-            return new Promise(_.bind(function(resolve, reject) {
+            return new Promise(_.bind(function (resolve, reject) {
                 this.request(
                     this.playerId,
                     params,
-                    function(result) {
+                    function (result) {
                         if (!result.ok) {
                             reject(result);
                         } else {
@@ -95,163 +109,372 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
         }
     };
 
-    this.clearPlayList = function(callback) {
+    /**
+     * Clear the playlist for this player.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.clearPlayList = function (callback) {
         this.request(playerId, ["playlist", "clear"], callback);
     };
 
-    this.getMode = function(callback) {
+    /**
+     * Get the current state of the player. i.e. playing, paused or stopped.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.getMode = function (callback) {
         this.request(playerId, ["mode", "?"], callback);
     };
 
-    this.setName = function(name, callback) {
+    /**
+     * Set the name of the player.
+     *
+     * @param name The new name for the player
+     * @param callback The function to call with the result
+     */
+
+    this.setName = function (name, callback) {
         this.request(playerId, ["name", name], callback);
     };
 
-    this.getName = function(callback) {
+    /**
+     * Get the name of the player.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.getName = function (callback) {
         this.request(playerId, ["name", "?"], callback);
     };
 
-    this.getCurrentTitle = function(callback) {
-        this.request(playerId, ["current_title", "?"], function(reply) {
+    /**
+     * Get the title of the current song playing.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.getCurrentTitle = function (callback) {
+        this.request(playerId, ["current_title", "?"], function (reply) {
             if (reply.ok)
                 reply.result = reply.result._current_title;
             callback(reply);
         });
     };
 
-    this.getArtist = function(callback) {
-        this.request(playerId, ["artist", "?"], function(reply) {
+    /**
+     * Get the artist of the current song playing.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.getArtist = function (callback) {
+        this.request(playerId, ["artist", "?"], function (reply) {
             if (reply.ok)
                 reply.result = reply.result._artist;
             callback(reply);
         });
     };
 
-    this.getAlbum = function(callback) {
-        this.request(playerId, ["album", "?"], function(reply) {
+    /**
+     * Get the album of the current song playing.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.getAlbum = function (callback) {
+        this.request(playerId, ["album", "?"], function (reply) {
             if (reply.ok)
                 reply.result = reply.result._album;
             callback(reply);
         });
     };
 
-    this.getCurrentRemoteMeta = function(callback) {
-        this.request(playerId, ["status"], function(reply) {
+    /**
+     * Get the remoteMeta part of the status of the player.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.getCurrentRemoteMeta = function (callback) {
+        this.request(playerId, ["status"], function (reply) {
             if (reply.ok)
                 reply.result = reply.result.remoteMeta;
             callback(reply);
         });
     };
 
-    this.getStatus = function(callback) {
+    /**
+     * Get the complete status of the player.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.getStatus = function (callback) {
         this.request(playerId, ["status"], callback);
     };
 
-    this.getStatusWithPlaylist = function(from, to, callback) {
-        this.request(playerId, ["status", from, to], function(reply) {
+    /**
+     * Get the status with part of the current playlist.
+     *
+     * @param from The place in the playlist to start getting information
+     * @param to The place in the playlist to get information up to
+     * @param callback The function to call with the result
+     */
+
+    this.getStatusWithPlaylist = function (from, to, callback) {
+        this.request(playerId, ["status", from, to], function (reply) {
             if (reply.ok)
                 reply.result = reply.result;
             callback(reply);
         });
     };
 
-    this.getPlaylist = function(from, to, callback) {
-        this.request(playerId, ["status", from, to], function(reply) {
+    /**
+     * Get a portion of the playlist.
+     *
+     * @param from The place in the playlist to start getting information
+     * @param to The place in the playlist to get information up to
+     * @param callback The function to call with the result
+     */
+
+    this.getPlaylist = function (from, to, callback) {
+        this.request(playerId, ["status", from, to], function (reply) {
             if (reply.ok)
                 reply.result = reply.result.playlist_loop;
             callback(reply);
         });
     };
 
-    this.play = function(callback) {
+    /**
+     * Start the player playing.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.play = function (callback) {
         this.request(playerId, ["play"], callback);
     };
 
-    this.playIndex = function(index, callback) {
+    /**
+     * Play a specific song in the playlist.
+     *
+     * @param index The index of the song to play.
+     * @param callback The function to call with the result
+     */
+
+    this.playIndex = function (index, callback) {
         this.request(playerId, ["playlist", "index", index], callback);
     };
 
-    this.pause = function(state,callback) {
+    /**
+     * Pause or unpause the player.
+     *
+     * @param state 1 to pause, 0 to unpause
+     * @param callback The function to call with the result
+     */
+
+    this.pause = function (state, callback) {
         this.request(playerId, ["pause", state ? "1" : "0"], callback);
     };
 
-    this.togglepause = function(callback) {
+    /**
+     * Toggle the pause state of the player.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.togglepause = function (callback) {
         this.request(playerId, ["pause"], callback);
     };
-    
-    this.previous = function(callback) {
+
+    /**
+     * Move the player to the previous song in the playlist.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.previous = function (callback) {
         this.request(playerId, ["button", "jump_rew"], callback);
     };
 
-    this.next = function(callback) {
+    /**
+     * Move the player to the next song in the playlist.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.next = function (callback) {
         this.request(playerId, ["button", "jump_fwd"], callback);
     };
 
-    this.playlistDelete = function(index, callback) {
+    /**
+     * Delete a song from the playlist.
+     *
+     * @param index The index of the song to delete
+     * @param callback The function to call with the result
+     */
+
+    this.playlistDelete = function (index, callback) {
         this.request(playerId, ["playlist", "delete", index], callback);
     };
 
-    this.playlistMove = function(fromIndex, toIndex, callback) {
+    /**
+     * Move a song in the playlist.
+     *
+     * @param fromIndex The index to move the song from
+     * @param toIndex The index to move the song to
+     * @param callback The function to call with the result
+     */
+
+    this.playlistMove = function (fromIndex, toIndex, callback) {
         this.request(playerId, ["playlist", "move", fromIndex, toIndex], callback);
     };
 
-    this.playlistSave = function(playlistName, callback) {
+    /**
+     * Save the current playlist.
+     *
+     * @param playlistName The name to save the playlist as.
+     * @param callback The function to call with the result
+     */
+
+    this.playlistSave = function (playlistName, callback) {
         this.request(playerId, ["playlist", "save", playlistName], callback);
     };
 
-    this.sync = function(syncTo, callback) {
+    /**
+     * Sync the current player to another.
+     *
+     * @param syncTo The index or playerId to sync to
+     * @param callback The function to call with the result
+     */
+
+    this.sync = function (syncTo, callback) {
         this.request(playerId, ["sync", syncTo], callback);
     };
 
-    this.unSync = function(callback) {
+    /**
+     * Unsync the current player.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.unSync = function (callback) {
         this.request(playerId, ["sync", "-"], callback);
     };
 
-    this.seek = function(seconds, callback) {
+    /**
+     * Move the playback of the current song to a specific point.
+     *
+     * @param seconds The time in the song to move to
+     * @param callback The function to call with the result
+     */
+
+    this.seek = function (seconds, callback) {
         this.request(playerId, ["time", seconds], callback);
     };
 
-    this.setVolume = function(volume, callback) {
+    /**
+     * Set the volume of the player.
+     *
+     * @param volume The volume to set to between 0 and 100
+     * @param callback The function to call with the result
+     */
+
+    this.setVolume = function (volume, callback) {
         this.request(playerId, ["mixer", "volume", volume], callback);
     };
 
-    this.getVolume = function(callback) {
-        this.request(playerId, ["mixer", "volume", "?"], function(reply) {
+    /**
+     * Get the current volume of the player.
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.getVolume = function (callback) {
+        this.request(playerId, ["mixer", "volume", "?"], function (reply) {
             if (reply.ok)
                 reply.result = reply.result._volume;
             callback(reply);
         });
     };
 
-    this.randomPlay = function(target, callback) {
+    /**
+     * Create and play a random list.
+     *
+     * @param target The type of list to generate, e.g. tracks, albums, contributors, year
+     * @param callback The function to call with the result
+     */
+
+    this.randomPlay = function (target, callback) {
         this.request(playerId, ["randomplay", target], callback);
     };
 
-    this.power = function(state, callback) {
+    /**
+     * Turn on or off the player.
+     *
+     * @param state 0 to turn the player off, 0 to turn it on
+     * @param callback The function to call with the result
+     */
+
+    this.power = function (state, callback) {
         this.request(playerId, ["power", state ? "1" : "0"], callback);
     };
+
+    /**
+     * Play a favourite
+     *
+     * @param favorite The ID of the item to play
+     * @param callback The function to call with the result
+     */
 
     this.playFavorite = function (favorite, callback) {
         this.request(playerId, ["favorites", "playlist", "play", "item_id:" + favorite], callback);
     };
 
-    //to append song url (path)/playlist or dir content to end of the list
+    /**
+     * Add an item to the playlist.
+     *
+     * @param item The item to add to the playlist
+     * @param callback The function to call with the result
+     */
+
     this.addToPlaylist = function (item, callback) {
         this.request(playerId, ["playlist", "add", item], callback);
     };
 
-    //to insert song url (path)/playlist or directory content after currently playing track
+    /**
+     * Insert an item into the playlist to be played immediately.
+     *
+     * @param item The item to insert
+     * @param callback The function to call with the result
+     */
+
     this.insertToPlaylist = function (item, callback) {
         this.request(playerId, ["playlist", "insert", item], callback);
     };
 
-    this.shuffle = function(state,callback) {
+    /**
+     * Set the shuffle state of the current playlist.
+     *
+     * @param state The state to set the list to, 0 no shuffle, 1 to shuffle
+     * @param callback The function to call with the result
+     */
+
+    this.shuffle = function (state, callback) {
         this.request(playerId, ["playlist", "shuffle", state ? "1" : "0"], callback);
     };
-    
-    //Function to set Linein mode on Squeezebox Boom
-    this.setLinein = function(callback){
-        this.request(playerId, ["setlinein", "linein"], callback);  
+
+    /**
+     * Function to set Linein mode on Squeezebox Boom
+     *
+     * @param callback The function to call with the result
+     */
+
+    this.setLinein = function (callback) {
+        this.request(playerId, ["setlinein", "linein"], callback);
     };
 }
 
