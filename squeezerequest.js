@@ -27,17 +27,18 @@ var inherits = require('super');
 var AWS;
 
 
-function SqueezeRequest(address, port, username, password) {
+// address "<http|https>://|hostbame[:port]"
+// transport "<[0-9]*|sqs[://region]|ssh://password:username@hostname:port"
+// sqs password = {send: "Queue URL, recv "Queue URL" }
 
-    this.address = (address !== undefined) ? address : "localhost";
+function SqueezeRequest(address, port, username, password) {
+    // FIXME URI
+    this.address = (typeof address !== 'string') ? 'localhost' : address;
     this.port = (port !== undefined) ? port : 9000;
     this.username = username;
     this.password = password;
-    var jsonrpc = this.address + ':' + this.port + '/jsonrpc.js';
-    var client = (this.address.substr(0, 5) === 'https') ? jayson.client.https(jsonrpc) : client = jayson.client.http(jsonrpc);
-    client.options.version = 1;
+    this.id = 'squeezenode.' + process.pid;// FIXME lamba seems to be 1 always add instance?
     this.queue = [];
-    this.id = "squeezenode." + process.pid;// FIXME lamba seems to be 1 always add instance?
     var that = this;
 
     /**
@@ -47,58 +48,101 @@ function SqueezeRequest(address, port, username, password) {
      * @param reply The reply
      * @param callback The function to call with the result
      */
-
     function handle(err, reply, callback) {
-
-        var result = {};
-        if (err) {
+       var result = {};
+       if (err) {
             result = err;
             result.ok = false;
-        } else {
+       } else {
             result = reply;
             result.ok = true;
-        }
+       }
 
-        if (callback)
+       if (callback)
             callback(result);
     }
 
-    // Set up to use an AWS SQS queue to communicate
+    // Set up to use an AWS SQS queue URL to communicate
+    if (typeof port === 'string' && port.substr(0, 3) === 'ssh') {
+	const { URL } = require('url');
+        var turl = new URL(this.port);
+        var surl = new URL(this.address);
+	var fp = 9192
+        const Tunnel = require('tunnel-ssh');
+        var tunnel_config = {
+            // transport url
+	    host: turl.hostname,
+	    port: (turl.port) ? turl.port : 22,
+	    username: turl.username,
+            // server url
+	    dstPort: (surl.port) ? surl.port : 9000,
+	    dstHost: surl.hostname,
+            // forward url?
+	    localPort: fp,
+	    //localHost: ,
+	    keepAlive: true,
+        }
+	var tp = decodeURIComponent(turl.password);
+	    console.log(tp);
+        if (tp.substr(0,7) === 'file://') {
+	    tunnel_config['privateKey'] = require('fs').readFileSync(tp.substr(7));
+        } else {
+	    tunnel_config['password'] = turl.password;
+	}
+	console.log(tunnel_config);
+        this.ssh_tunnel = Tunnel(tunnel_config, function(error, server) {
+	    if (error) {
+	            console.log(error);
+	    }
+        });
 
-    if (port == 'aws') {
+        // Use a listener to handle errors outside the callback
+        this.ssh_tunnel.on('error', function(err) {
+            console.error('SSH Tunnel:', err);
+	    console.log('Tunnel error');
+        });
+	this.address = surl.protocol+'//localhost';
+	this.port = fp;
+	console.log(surl);
+    }
 
-        AWS = require('aws-sdk');
-        this.request = request_sqs;
-        this.sqs = new AWS.SQS({region: 'us-west-2'});
-        this.sendq = {QueueUrl: password.send, MessageGroupId: this.id};
-        this.recvq = {QueueUrl: password.recv, WaitTimeSeconds: 0, MaxNumberOfMessages: 10};
-        this.reciving = true
-        this.sqs.receiveMessage(that.recvq, function (err, reply) {
-            that.recvq.MaxNumberOfMessages = 1;
-            that.recvq.WaitTimeSeconds = 20;
-            if (reply.Messages) {
-                var msg = reply.Messages.pop();
-                while (msg) {
+    if (typeof this.port ==='string' && this.port.substr(0, 3) === 'sqs') {
+          AWS = require('aws-sdk');
+          this.request = request_sqs;
+	  // FIXME decode region from url
+          this.sqs = new AWS.SQS({region: 'us-west-2'});
+          this.sendq = {QueueUrl: password.send, MessageGroupId: this.id};
+          this.recvq = {QueueUrl: password.recv, WaitTimeSeconds: 0, MaxNumberOfMessages: 10};
+          this.reciving = true
+          this.sqs.receiveMessage(that.recvq, function (err, reply) {
+             that.recvq.MaxNumberOfMessages = 1;
+             that.recvq.WaitTimeSeconds = 20;
+             if (reply.Messages) {
+                 var msg = reply.Messages.pop();
+                 while (msg) {
                     var deleteParams = {
                         QueueUrl: that.recvq.QueueUrl,
                         ReceiptHandle: msg.ReceiptHandle
                     };
                     that.sqs.deleteMessage(deleteParams, function (err, data) {
+			    //
                     });
                     msg = reply.Messages.pop();
-                }
-            }
-            request_sqs_dispatch_queue();
-        }); //Drain Q.
+                 }
+             }
+             request_sqs_dispatch_queue();
+          }); //Drain Q.
 
     } else {
-
         // Use JSON RPC to communicate
-
         this.request = request_rpc;
 
-        // Add a header for basic authentication if a username and password are given
+        var jsonrpc = (typeof this.port === 'number') ? this.address + ':' + this.port + '/jsonrpc.js' : this.address + '/jsonrpc.js' ;
+        client = (this.address.substr(0, 5) === 'https') ? jayson.client.https(jsonrpc) : client = jayson.client.http(jsonrpc);
+        client.options.version = 1;
 
+	// FIXME URL
+        // Add a header for basic authentication if a username and password are given
         if (username && password) {
             if (!client.options.headers)
                 client.options.headers = {};

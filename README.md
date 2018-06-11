@@ -91,6 +91,18 @@ Let's assume you'd like to play 'The Fixer' performed by Pearl Jam with player '
         });
     });
 
+FEATURES
+-----------------------
+* Suppport for HTTP basic auth
+* HTTPS
+* Intergrated SSH tunnel Support
+* AWS SQS Transport
+
+COMMANDS
+--------
+* Server
+* Player
+
 TODO
 ----
 
@@ -98,8 +110,3 @@ TODO
 * Add full API description
 * Add wiki
 
-squeezenode-lordpengwin
------------------------
-* Added suppport for HTTP basic auth
-* Added support for additional commands
-* Merged changes from pssc fork
