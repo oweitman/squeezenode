@@ -267,12 +267,12 @@ function SqueezeServer(address, port, username, password, sa) {
             self.getApps(function (areply) {
 
                 if (areply.ok) {
-                    
+
                     let apps = areply.result.appss_loop;
                     let dir = __dirname + '/';
                     fs.readdir(dir, function (err, files) {
                         files.forEach(function (file) {
-                            
+
                             let fil = file.substr(0, file.lastIndexOf("."));
                             for (let pl in apps) {
                                 if (fil === apps[pl].cmd) {
@@ -286,8 +286,9 @@ function SqueezeServer(address, port, username, password, sa) {
                         self.emit('register', reply, areply);
                     });
 
-                } else
+                } else {
                     self.emit('register', reply, areply);
+		}
             });
         });
     }

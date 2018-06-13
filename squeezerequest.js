@@ -106,7 +106,7 @@ function SqueezeRequest(address, port, username, password) {
 	console.log(surl);
     }
 
-    if (typeof this.port ==='string' && this.port.substr(0, 3) === 'sqs') {
+    if (typeof this.port ==='string' && this.port.substr(0, 6) === 'awssqs') {
           AWS = require('aws-sdk');
           this.request = request_sqs;
 	  // FIXME decode region from url

@@ -17,7 +17,8 @@
   ],
   "devDependencies": {
     "celeri": "git+https://github.com/crcn-archive/celeri.git",
-    "nomnom": "^1.8.1"
+    "nomnom": "^1.8.1",
+    "aws-sdk": "^2.255.1"
   },
   "dependencies": {
     "jayson": "^1.1.3",

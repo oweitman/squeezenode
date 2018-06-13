@@ -96,7 +96,7 @@ FEATURES
 * Suppport for HTTP basic auth
 * HTTPS
 * Intergrated SSH tunnel Support
-* AWS SQS Transport
+* AWS SQS Transport for use with SSAWSSQS plugin http://hithub.com/pssc/SSAWSSQS
 
 COMMANDS
 --------
