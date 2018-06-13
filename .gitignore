@@ -4,3 +4,4 @@ node_modules
 /.externalToolBuilders
 /.settings
 /.vscode
+examples/id_rsa
