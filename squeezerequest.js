@@ -177,7 +177,7 @@ function SqueezeRequest(address, port, username, password) {
 
         that.sendq['MessageBody'] = JSON.stringify({
             "params": [player, params],
-            "id": that.id,
+            "id": that.id + process.hrtime(),
             "version": "1.0",
             "method": "slim.request"
         }); // FIXME id not on pid but an uuid? for instrance from env?

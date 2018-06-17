@@ -37,7 +37,7 @@ var SqueezePlayer = require('./squeezeplayer');
  * @param sa A flag to skip apps
  */
 
-function SqueezeServer(address, port, username, password, sa) {
+function SqueezeServer(address, port, username, password, sa, sp) {
 
     SqueezeServer.super_.apply(this, arguments);
     var defaultPlayer = "00:00:00:00:00:00";
@@ -230,38 +230,40 @@ function SqueezeServer(address, port, username, password, sa) {
         })
     };
 
+    this.registerPlayers = function registerPlayers (playerslist) {
+        for (let pl in players) {
+            if (! self.players[players[pl].playerid]) { // player not on the list
+                self.players[players[pl].playerid] = new SqueezePlayer(players[pl].playerid, players[pl].name, self.address, self.port, self.username, self.password);
+            }
+        }
+    }
+
     /**
      * Find out if we can contact the server and get some basic information
      *
      * @param skipApps A flag to skip getting information about the apps
      */
 
-    function register(skipApps) {
+    function register(skipApps,skipPlayers) {
 
+	if (!skipPlayers)
         // Get the list of players from the server
-
         self.getPlayers(function (reply) {
-
             // Process the player information and create Player objects for each one
-
-            let players = reply.result;
-            for (let pl in players) {
-                if (! self.players[players[pl].playerid]) { // player not on the list
-                    self.players[players[pl].playerid] = new SqueezePlayer(players[pl].playerid, players[pl].name, self.address, self.port, self.username, self.password);
-                }
-            }
+	    if (reply.ok)
+                 self.registerPlayers(reply.result);
 
             // Send a signal that we are done
-
             if (skipApps) {
                 self.emit('register', reply, undefined);
             } else {
                 self.emit('registerPlayers', reply);
             }
         });
+	}
 
+	if(!skipApps) {
         // Once the players have been obtained, request a list of the apps
-
         self.on('registerPlayers', function (reply) {
 
             self.getApps(function (areply) {
@@ -291,9 +293,10 @@ function SqueezeServer(address, port, username, password, sa) {
 		}
             });
         });
+	}
     }
 
-    register(sa);
+    register(sa,sp);
 }
 
 inherits(SqueezeServer, SqueezeRequest);
