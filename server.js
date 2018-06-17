@@ -230,7 +230,7 @@ function SqueezeServer(address, port, username, password, sa, sp) {
         })
     };
 
-    this.registerPlayers = function registerPlayers (playerslist) {
+    this.registerPlayers = function (players) {
         for (let pl in players) {
             if (! self.players[players[pl].playerid]) { // player not on the list
                 self.players[players[pl].playerid] = new SqueezePlayer(players[pl].playerid, players[pl].name, self.address, self.port, self.username, self.password);
@@ -246,7 +246,7 @@ function SqueezeServer(address, port, username, password, sa, sp) {
 
     function register(skipApps,skipPlayers) {
 
-	if (!skipPlayers)
+	if (!skipPlayers) {
         // Get the list of players from the server
         self.getPlayers(function (reply) {
             // Process the player information and create Player objects for each one
