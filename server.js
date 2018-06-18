@@ -251,7 +251,7 @@ function SqueezeServer(address, port, username, password, sa, sp) {
 
         for (var id in this.players) {
             if (
-                this.normalizePlayer(this.players[id].name)) === name || // name matches the requested player
+                this.normalizePlayer(this.players[id].name) === name || // name matches the requested player
                 (name === "" && (only && this.players.length === 1))      // name is undefined and there's only one player,
                                                                 // so assume that's the one we want.
             ) {
