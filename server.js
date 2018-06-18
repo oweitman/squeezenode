@@ -45,7 +45,6 @@ function SqueezeServer(address, port, username, password, sa, sp) {
     this.players = [];
     this.apps = [];
     var subs = {};
-    this.playerUpdateInterval = 2000;
 
     /**
      * Subscribe to an event on a channel
@@ -236,6 +235,49 @@ function SqueezeServer(address, port, username, password, sa, sp) {
                 self.players[players[pl].playerid] = new SqueezePlayer(players[pl].playerid, players[pl].name, self.address, self.port, self.username, self.password);
             }
         }
+    }
+
+    /**
+     * Get Player oject for name, needs the players registred and normisles names with a lc search removeving puntuation
+     *
+     * @param name string
+     * @param only reten the one player if only one
+     */
+    this.findPlayerObjectByName = function (name, only) {
+        name = this.normalizePlayer(name);
+
+        // Look for the player in the players list that matches the given name. Then return the corresponding player object
+        // from the squeezeserver stored by the player's id
+
+        for (var id in this.players) {
+            if (
+                this.normalizePlayer(this.players[id].name)) === name || // name matches the requested player
+                (name === "" && (only && this.players.length === 1))      // name is undefined and there's only one player,
+                                                                // so assume that's the one we want.
+            ) {
+                return this.players[id];
+            }
+        }
+        return undefined
+    }
+
+   /**
+    *  Do any necessary clean up of player names
+    *
+    * @param playerName The name of the player to clean up
+    * @param filter optional fn(str) returns str
+    * @returns The normalized player name
+    */
+
+    this.normalizePlayer = function (playerName) {
+
+        playerName || (playerName = ''); // protect against `playerName` being undefined
+        playerName = playerName.replace('-', ' ');
+        playerName = playerName.replace('   ', '  ');
+        playerName = playerName.replace('  ', '  ');
+        playerName = playerName.toLowerCase(playerName);
+
+        return playerName;
     }
 
     /**
