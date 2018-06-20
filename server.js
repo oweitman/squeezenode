@@ -52,7 +52,6 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param channel The channel that received the event
      * @param sub The callback for the event
      */
-
     this.on = function (channel, sub) {
 
         subs[channel] = subs[channel] || [];
@@ -80,7 +79,7 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      */
 
     this.getPlayerCount = function (callback) {
-        this.request(defaultPlayer, ["player", "count", "?"], callback);
+        return this.request(defaultPlayer, ["player", "count", "?"], callback);
     };
 
     /**
@@ -89,9 +88,8 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param index The index of the player to get the ID for
      * @param callback The function to call with the result.
      */
-
     this.getPlayerId = function (index, callback) {
-        this.request(defaultPlayer, ["player", "id", index, "?"], callback);
+        return this.request(defaultPlayer, ["player", "id", index, "?"], callback);
     };
 
     /**
@@ -100,9 +98,8 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param playerId The ID or index of the player
      * @param callback The function to call with the result.
      */
-
     this.getPlayerIp = function (playerId, callback) {
-        this.request(defaultPlayer, ["player", "ip", playerId, "?"], callback);
+        return this.request(defaultPlayer, ["player", "ip", playerId, "?"], callback);
     };
 
     /**
@@ -111,9 +108,8 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param playerId The ID or index of the player
      * @param callback The function to call with the result.
      */
-
     this.getPlayerName = function (playerId, callback) {
-        this.request(defaultPlayer, ["player", "name", playerId, "?"], callback);
+       return this.request(defaultPlayer, ["player", "name", playerId, "?"], callback);
     };
 
     /**
@@ -121,9 +117,8 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      *
      * @param callback The function to call with the result.
      */
-
     this.getSyncGroups = function (callback) {
-        this.request(defaultPlayer, ["syncgroups", "?"], callback);
+        return this.request(defaultPlayer, ["syncgroups", "?"], callback);
     };
 
     /**
@@ -131,12 +126,9 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      *
      * @param callback The function to call with the result.
      */
-
     this.getApps = function (callback) {
-        this.request(defaultPlayer, ["apps", 0, 100], callback);
+        return this.request(defaultPlayer, ["apps", 0, 100], callback);
     };
-
-    //
 
     /**
      * Get the content of a music folder.
@@ -144,9 +136,8 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param folderId The ID of the folder to get. Pass 0 or empty string "" to display root of music folder
      * @param callback The function to call with the result.
      */
-
     this.musicfolder = function (folderId, callback) {
-        this.request(defaultPlayer, ["musicfolder", 0, 100, "folder_id:" + folderId], callback);
+          return this.request(defaultPlayer, ["musicfolder", 0, 100, "folder_id:" + folderId], callback);
     };
 
     /**
@@ -154,8 +145,16 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      *
      * @param callback The function to call with the result.
      */
-
     this.getPlayers = function (callback) {
+      if (typeof callback === 'undefined') { // Promise style
+
+        return self.request(defaultPlayer, ["players", 0, 100])
+          .then( function (reply) {
+                reply.result = reply.result.players_loop;
+                return reply;
+          } );
+
+      } else { // Callback style
 
         self.request(defaultPlayer, ["players", 0, 100], function (reply) {
             if (reply.ok)
@@ -170,7 +169,6 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param callback The callback to call with the result
      * @param limit The maximum number of results
      */
-
     this.getArtists = function (callback, limit) {
 
         self.request(defaultPlayer, ["artists", 0, limit], function (reply) {
@@ -186,7 +184,6 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param callback The callback to call with the result
      * @param limit The maximum number of results
      */
-
     this.getAlbums = function (callback, limit) {
 
         self.request(defaultPlayer, ["albums", 0, limit], function (reply) {
@@ -228,7 +225,12 @@ function SqueezeServer(address, port, username, password, sa, sp) {
             callback(reply);
         })
     };
-
+    
+    /**
+     * Regiter players from and array from get players
+     *
+     * @param players array
+     */
     this.registerPlayers = function (players) {
         for (let pl in players) {
             if (! self.players[players[pl].playerid]) { // player not on the list
@@ -241,7 +243,7 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * Get Player oject for name, needs the players registred and normisles names with a lc search removeving puntuation
      *
      * @param name string
-     * @param only reten the one player if only one
+     * @param only return the one player if only one
      */
     this.findPlayerObjectByName = function (name, only) {
         name = this.normalizePlayer(name);
@@ -268,7 +270,6 @@ function SqueezeServer(address, port, username, password, sa, sp) {
     * @param filter optional fn(str) returns str
     * @returns The normalized player name
     */
-
     this.normalizePlayer = function (playerName) {
 
         playerName || (playerName = ''); // protect against `playerName` being undefined
@@ -285,56 +286,53 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      *
      * @param skipApps A flag to skip getting information about the apps
      */
-
     function register(skipApps,skipPlayers) {
 
 	if (!skipPlayers) {
-        // Get the list of players from the server
-        self.getPlayers(function (reply) {
-            // Process the player information and create Player objects for each one
-	    if (reply.ok)
-                 self.registerPlayers(reply.result);
+            // Get the list of players from the server
+            self.getPlayers(function (reply) {
+                // Process the player information and create Player objects for each one
+	        if (reply.ok)
+                    self.registerPlayers(reply.result);
 
-            // Send a signal that we are done
-            if (skipApps) {
-                self.emit('register', reply, undefined);
-            } else {
-                self.emit('registerPlayers', reply);
-            }
-        });
+                // Send a signal that we are done
+                if (skipApps) {
+                    self.emit('register', reply, undefined);
+                } else {
+                    self.emit('registerPlayers', reply);
+                }
+            });
 	}
 
-	if(!skipApps) {
-        // Once the players have been obtained, request a list of the apps
-        self.on('registerPlayers', function (reply) {
+	if (!skipApps) {
+            // Once the players have been obtained, request a list of the apps
+            self.on('registerPlayers', function (reply) {
 
-            self.getApps(function (areply) {
+                self.getApps(function (areply) {
 
-                if (areply.ok) {
+                    if (areply.ok) {
 
-                    let apps = areply.result.appss_loop;
-                    let dir = __dirname + '/';
-                    fs.readdir(dir, function (err, files) {
-                        files.forEach(function (file) {
+                        let apps = areply.result.appss_loop;
+                        let dir = __dirname + '/';
+                        fs.readdir(dir, function (err, files) {
+                             files.forEach(function (file) {
 
-                            let fil = file.substr(0, file.lastIndexOf("."));
-                            for (let pl in apps) {
-                                if (fil === apps[pl].cmd) {
-                                    let app = require(dir + file);
-                                    self.apps[apps[pl].cmd] = new app(defaultPlayer, apps[pl].name, apps[pl].cmd, self.address, self.port, self.username, self.password);
-                                    /* workaround, app needs existing player id so first is used here */
-                                }
-                            }
+                                 let fil = file.substr(0, file.lastIndexOf("."));
+                                 for (let pl in apps) {
+                                     if (fil === apps[pl].cmd) {
+                                         let app = require(dir + file);
+                                         self.apps[apps[pl].cmd] = new app(defaultPlayer, apps[pl].name, apps[pl].cmd, self.address, self.port, self.username, self.password);
+                                         / * workaround, app needs existing player id so first is used here */
+                                     }
+                                 }
+                             });
+                             self.emit('register', reply, areply);
                         });
-
+                    } else {
                         self.emit('register', reply, areply);
-                    });
-
-                } else {
-                    self.emit('register', reply, areply);
-		}
+		    }
+                });
             });
-        });
 	}
     }
 

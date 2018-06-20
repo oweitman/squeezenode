@@ -26,11 +26,12 @@ var jayson = require('jayson');
 var inherits = require('super');
 var AWS;
 
-
-// address "<http|https>://|hostbame[:port]"
-// transport "<[0-9]*|sqs[://region]|ssh://password:username@hostname:port"
-// sqs password = {send: "Queue URL, recv "Queue URL" }
-
+/**
+ * 
+ * @param address "<http|https>://|hostbame[:port]"
+ * @param port "<[0-9]*|sqs[://region]|ssh://<password>|<fileurl>:username@hostname:port"
+ * @param password sqs password = {send: "Queue URL, recv "Queue URL" }
+ */
 function SqueezeRequest(address, port, username, password) {
     // FIXME URI
     this.address = (typeof address !== 'string') ? 'localhost' : address;
@@ -48,18 +49,18 @@ function SqueezeRequest(address, port, username, password) {
      * @param reply The reply
      * @param callback The function to call with the result
      */
-    function handle(err, reply, callback) {
+    function handle(err, reply, callback, resolve, reject) {
        var result = {};
        if (err) {
             result = err;
             result.ok = false;
+            if (reject) reject(result);
        } else {
             result = reply;
             result.ok = true;
+            if (resolve) resolve(result);
        }
-
-       if (callback)
-            callback(result);
+       if (callback) callback(result);
     }
 
     // Set up to use an AWS SQS queue URL to communicate
@@ -155,14 +156,21 @@ function SqueezeRequest(address, port, username, password) {
      *
      * @param player The target player
      * @param params Request parameters
-     * @param callback The function to call with the result
+     * @param callback The function to call with the result or return promise if undefined
      */
-
     function request_rpc(player, params, callback) {
 
-        client.request('slim.request', [player, params], that.id, function (err, reply) {
-            handle(err, reply, callback);
-        });
+        if (callback) {
+            client.request('slim.request', [player, params], that.id, function (err, reply) {
+                return handle(err, reply, callback);
+            });
+         } else {
+            return new Promise( function(resolve, reject) {
+                client.request('slim.request', finalParams, null, function (err, reply) {
+                    return handle(err, reply, callback, resolve, reject);
+                });
+            });
+        }
     }
 
     /**
@@ -233,7 +241,7 @@ function SqueezeRequest(address, port, username, password) {
     }
 
     // We need to serialise requests and responces for queue use
-
+    // FIXME promise
     function request_sqs(player, params, callback) {
         if (that.reciving) {
             that.queue.push([player, params, callback]);
@@ -255,7 +263,6 @@ function SqueezeRequest(address, port, username, password) {
 /**
  * Function to format the header for basic authentication.
  */
-
 function formatBasicHeader(username, password) {
     var tok = username + ':' + password;
     var hash = new Buffer(tok).toString('base64');

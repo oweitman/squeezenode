@@ -1,7 +1,7 @@
 {
   "name": "squeezenode-pssc",
   "author": "Piotr Raczynski <pio[dot]raczynski[at]gmail[dot]com> & Others",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Node.js wrapper library for squeezebox CLI/json/SQS/SSH Tunnled interface with Spotify/SoundCloud support",
   "main": "server.js",
   "keywords": [
@@ -13,7 +13,7 @@
     "remote",
     "smarthome",
     "home automation",
-    "queezy"
+    "squeezy"
   ],
   "devDependencies": {
     "celeri": "git+https://github.com/crcn-archive/celeri.git",

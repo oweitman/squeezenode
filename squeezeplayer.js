@@ -32,7 +32,6 @@ var SqueezeRequest = require('./squeezerequest');
  * @param username The username for authentication
  * @param password The password for authentication
  */
-
 function SqueezePlayer(playerId, name, address, port, username, password) {
 
     this.playerId = playerId;
@@ -76,7 +75,6 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @returns Promise|Undefined
      *
      */
-
     this.callMethod = function (opts) {
 
         if (_.isUndefined(opts.method)) {
@@ -114,9 +112,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.clearPlayList = function (callback) {
-        this.request(playerId, ["playlist", "clear"], callback);
+        return this.request(playerId, ["playlist", "clear"], callback);
     };
 
     /**
@@ -124,9 +121,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.getMode = function (callback) {
-        this.request(playerId, ["mode", "?"], callback);
+        return this.request(playerId, ["mode", "?"], callback);
     };
 
     /**
@@ -135,9 +131,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param name The new name for the player
      * @param callback The function to call with the result
      */
-
     this.setName = function (name, callback) {
-        this.request(playerId, ["name", name], callback);
+        return this.request(playerId, ["name", name], callback);
     };
 
     /**
@@ -145,9 +140,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.getName = function (callback) {
-        this.request(playerId, ["name", "?"], callback);
+        return this.request(playerId, ["name", "?"], callback);
     };
 
     /**
@@ -155,8 +149,14 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.getCurrentTitle = function (callback) {
+        if( typeof callback === 'undefined' ){ // Promise style
+          return this.request(playerId, ["current_title", "?"]).then( function(reply) {
+            reply.result = reply.result._current_title;
+            return reply;
+          });
+        }
+
         this.request(playerId, ["current_title", "?"], function (reply) {
             if (reply.ok)
                 reply.result = reply.result._current_title;
@@ -169,7 +169,6 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.getArtist = function (callback) {
         this.request(playerId, ["artist", "?"], function (reply) {
             if (reply.ok)
@@ -253,9 +252,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.play = function (callback) {
-        this.request(playerId, ["play"], callback);
+        return this.request(playerId, ["play"], callback);
     };
 
     /**
@@ -264,9 +262,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param index The index of the song to play.
      * @param callback The function to call with the result
      */
-
     this.playIndex = function (index, callback) {
-        this.request(playerId, ["playlist", "index", index], callback);
+        return this.request(playerId, ["playlist", "index", index], callback);
     };
 
     /**
@@ -275,9 +272,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param state 1 to pause, 0 to unpause
      * @param callback The function to call with the result
      */
-
     this.pause = function (state, callback) {
-        this.request(playerId, ["pause", state ? "1" : "0"], callback);
+        return this.request(playerId, ["pause", state ? "1" : "0"], callback);
     };
 
     /**
@@ -285,9 +281,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.togglepause = function (callback) {
-        this.request(playerId, ["pause"], callback);
+        return this.request(playerId, ["pause"], callback);
     };
 
     /**
@@ -295,9 +290,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.previous = function (callback) {
-        this.request(playerId, ["button", "jump_rew"], callback);
+        return this.request(playerId, ["button", "jump_rew"], callback);
     };
 
     /**
@@ -305,9 +299,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.next = function (callback) {
-        this.request(playerId, ["button", "jump_fwd"], callback);
+        return this.request(playerId, ["button", "jump_fwd"], callback);
     };
 
     /**
@@ -316,9 +309,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param index The index of the song to delete
      * @param callback The function to call with the result
      */
-
     this.playlistDelete = function (index, callback) {
-        this.request(playerId, ["playlist", "delete", index], callback);
+        return this.request(playerId, ["playlist", "delete", index], callback);
     };
 
     /**
@@ -328,9 +320,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param toIndex The index to move the song to
      * @param callback The function to call with the result
      */
-
     this.playlistMove = function (fromIndex, toIndex, callback) {
-        this.request(playerId, ["playlist", "move", fromIndex, toIndex], callback);
+        return this.request(playerId, ["playlist", "move", fromIndex, toIndex], callback);
     };
 
     /**
@@ -339,9 +330,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param playlistName The name to save the playlist as.
      * @param callback The function to call with the result
      */
-
     this.playlistSave = function (playlistName, callback) {
-        this.request(playerId, ["playlist", "save", playlistName], callback);
+        return this.request(playerId, ["playlist", "save", playlistName], callback);
     };
 
     /**
@@ -350,9 +340,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param syncTo The index or playerId to sync to
      * @param callback The function to call with the result
      */
-
     this.sync = function (syncTo, callback) {
-        this.request(playerId, ["sync", syncTo], callback);
+        return this.request(playerId, ["sync", syncTo], callback);
     };
 
     /**
@@ -360,9 +349,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.unSync = function (callback) {
-        this.request(playerId, ["sync", "-"], callback);
+        return this.request(playerId, ["sync", "-"], callback);
     };
 
     /**
@@ -371,9 +359,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param seconds The time in the song to move to
      * @param callback The function to call with the result
      */
-
     this.seek = function (seconds, callback) {
-        this.request(playerId, ["time", seconds], callback);
+        return this.request(playerId, ["time", seconds], callback);
     };
 
     /**
@@ -382,9 +369,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param volume The volume to set to between 0 and 100
      * @param callback The function to call with the result
      */
-
     this.setVolume = function (volume, callback) {
-        this.request(playerId, ["mixer", "volume", volume], callback);
+        return this.request(playerId, ["mixer", "volume", volume], callback);
     };
 
     /**
@@ -407,20 +393,18 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param target The type of list to generate, e.g. tracks, albums, contributors, year
      * @param callback The function to call with the result
      */
-
     this.randomPlay = function (target, callback) {
-        this.request(playerId, ["randomplay", target], callback);
+        return this.request(playerId, ["randomplay", target], callback);
     };
 
     /**
      * Turn on or off the player.
      *
-     * @param state 0 to turn the player off, 0 to turn it on
+     * @param state t/f to turn the player off, 0 to turn it on
      * @param callback The function to call with the result
      */
-
     this.power = function (state, callback) {
-        this.request(playerId, ["power", state ? "1" : "0"], callback);
+        return this.request(playerId, ["power", state ? "1" : "0"], callback);
     };
 
     /**
@@ -429,9 +413,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param favorite The ID of the item to play
      * @param callback The function to call with the result
      */
-
     this.playFavorite = function (favorite, callback) {
-        this.request(playerId, ["favorites", "playlist", "play", "item_id:" + favorite], callback);
+        return this.request(playerId, ["favorites", "playlist", "play", "item_id:" + favorite], callback);
     };
 
     /**
@@ -440,9 +423,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param item The item to add to the playlist
      * @param callback The function to call with the result
      */
-
     this.addToPlaylist = function (item, callback) {
-        this.request(playerId, ["playlist", "add", item], callback);
+        return this.request(playerId, ["playlist", "add", item], callback);
     };
 
     /**
@@ -451,20 +433,19 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      * @param item The item to insert
      * @param callback The function to call with the result
      */
-
     this.insertToPlaylist = function (item, callback) {
-        this.request(playerId, ["playlist", "insert", item], callback);
+        return this.request(playerId, ["playlist", "insert", item], callback);
     };
 
     /**
      * Set the shuffle state of the current playlist.
      *
-     * @param state The state to set the list to, 0 no shuffle, 1 to shuffle
+     * @param state The state to set the list true/false to, 0 no shuffle, 1 to shuffle
      * @param callback The function to call with the result
+     * FIXME album track none
      */
-
     this.shuffle = function (state, callback) {
-        this.request(playerId, ["playlist", "shuffle", state ? "1" : "0"], callback);
+        return this.request(playerId, ["playlist", "shuffle", state ? "1" : "0"], callback);
     };
 
     /**
@@ -472,9 +453,8 @@ function SqueezePlayer(playerId, name, address, port, username, password) {
      *
      * @param callback The function to call with the result
      */
-
     this.setLinein = function (callback) {
-        this.request(playerId, ["setlinein", "linein"], callback);
+        return this.request(playerId, ["setlinein", "linein"], callback);
     };
 }
 
