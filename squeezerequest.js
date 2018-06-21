@@ -24,9 +24,11 @@
 
 var jayson = require('jayson');
 var inherits = require('super');
+
 var AWS;
 
 /**
+ * Squeeze Server Object, access to players and server optiations
  * 
  * @param address "<http|https>://|hostbame[:port]"
  * @param port "<[0-9]*|sqs[://region]|ssh://<password>|<fileurl>:username@hostname:port"
@@ -48,6 +50,8 @@ function SqueezeRequest(address, port, username, password) {
      * @param err An error message
      * @param reply The reply
      * @param callback The function to call with the result
+     * @param resolve promise
+     * @param reject promise
      */
     function handle(err, reply, callback, resolve, reject) {
        var result = {};
@@ -166,7 +170,7 @@ function SqueezeRequest(address, port, username, password) {
             });
          } else {
             return new Promise( function(resolve, reject) {
-                client.request('slim.request', finalParams, null, function (err, reply) {
+                client.request('slim.request', [player,params] , that.id, function (err, reply) {
                     return handle(err, reply, callback, resolve, reject);
                 });
             });

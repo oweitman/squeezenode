@@ -24,6 +24,7 @@
 
 var inherits = require('super');
 var fs = require('fs');
+
 var SqueezeRequest = require('./squeezerequest');
 var SqueezePlayer = require('./squeezeplayer');
 
@@ -63,7 +64,6 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      *
      * @param channel The even channel
      */
-
     this.emit = function (channel) {
 
         let args = [].slice.call(arguments, 1);
@@ -77,7 +77,6 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      *
      * @param callback The function to call with the result.
      */
-
     this.getPlayerCount = function (callback) {
         return this.request(defaultPlayer, ["player", "count", "?"], callback);
     };
@@ -146,21 +145,19 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param callback The function to call with the result.
      */
     this.getPlayers = function (callback) {
-      if (typeof callback === 'undefined') { // Promise style
-
-        return self.request(defaultPlayer, ["players", 0, 100])
-          .then( function (reply) {
-                reply.result = reply.result.players_loop;
-                return reply;
-          } );
-
-      } else { // Callback style
-
-        self.request(defaultPlayer, ["players", 0, 100], function (reply) {
-            if (reply.ok)
-                reply.result = reply.result.players_loop;
-            callback(reply);
-        });
+        if (callback) {
+             self.request(defaultPlayer, ["players", 0, 100], function (reply) {
+                 if (reply.ok)
+                     reply.result = reply.result.players_loop;
+                     callback(reply);
+             });
+        } else {
+              return self.request(defaultPlayer, ["players", 0, 100])
+                  .then( function (reply) {
+                      reply.result = reply.result.players_loop;
+                      return reply;
+                  });
+        }
     };
 
     /**
@@ -246,39 +243,38 @@ function SqueezeServer(address, port, username, password, sa, sp) {
      * @param only return the one player if only one
      */
     this.findPlayerObjectByName = function (name, only) {
-        name = this.normalizePlayer(name);
+        name = this.normalizeName(name);
 
         // Look for the player in the players list that matches the given name. Then return the corresponding player object
         // from the squeezeserver stored by the player's id
 
         for (var id in this.players) {
             if (
-                this.normalizePlayer(this.players[id].name) === name || // name matches the requested player
+                this.normalizeName(this.players[id].name) === name || // name matches the requested player
                 (name === "" && (only && this.players.length === 1))      // name is undefined and there's only one player,
                                                                 // so assume that's the one we want.
             ) {
                 return this.players[id];
             }
         }
-        return undefined
+        return undefined;
     }
 
    /**
     *  Do any necessary clean up of player names
     *
-    * @param playerName The name of the player to clean up
-    * @param filter optional fn(str) returns str
+    * @param Name The name of the player to clean up
     * @returns The normalized player name
     */
-    this.normalizePlayer = function (playerName) {
+    this.normalizeName = function (name) {
 
-        playerName || (playerName = ''); // protect against `playerName` being undefined
-        playerName = playerName.replace('-', ' ');
-        playerName = playerName.replace('   ', '  ');
-        playerName = playerName.replace('  ', '  ');
-        playerName = playerName.toLowerCase(playerName);
+        name || (name = ''); // protect against `playerName` being undefined
+        name = name.replace('-', ' ');
+        name = name.replace('   ', '  ');
+        name = name.replace('  ', '  ');
+        name = name.toLowerCase();
 
-        return playerName;
+        return name;
     }
 
     /**
@@ -292,8 +288,7 @@ function SqueezeServer(address, port, username, password, sa, sp) {
             // Get the list of players from the server
             self.getPlayers(function (reply) {
                 // Process the player information and create Player objects for each one
-	        if (reply.ok)
-                    self.registerPlayers(reply.result);
+	        if (reply.ok) self.registerPlayers(reply.result);
 
                 // Send a signal that we are done
                 if (skipApps) {
