@@ -40,7 +40,7 @@ function SqueezeRequest(address, port, username, password) {
     this.port = (port !== undefined) ? port : 9000;
     this.username = username;
     this.password = password;
-    this.id = 'squeezenode.' + process.pid;// FIXME lamba seems to be 1 always add instance?
+    this.id = 'squeezenode.' + process.pid + '.' + process.hrtime();// FIXME lamba seems to be 1 always add instance?
     this.queue = [];
     var that = this;
 
@@ -55,8 +55,9 @@ function SqueezeRequest(address, port, username, password) {
      */
     function handle(err, reply, callback, resolve, reject) {
        var result = {};
+       //if (err || !reply.result) {
        if (err) {
-            result = err;
+            result = err ? err : 'no result: '+ reply;
             result.ok = false;
             if (reject) reject(result);
        } else {
@@ -166,12 +167,12 @@ function SqueezeRequest(address, port, username, password) {
 
         if (callback) {
             client.request('slim.request', [player, params], that.id, function (err, reply) {
-                return handle(err, reply, callback);
+                handle(err, reply, callback);
             });
          } else {
             return new Promise( function(resolve, reject) {
                 client.request('slim.request', [player,params] , that.id, function (err, reply) {
-                    return handle(err, reply, callback, resolve, reject);
+                    handle(err, reply, callback, resolve, reject);
                 });
             });
         }
@@ -185,11 +186,11 @@ function SqueezeRequest(address, port, username, password) {
      * @param callback The function to call with the result
      */
 
-    function request_sqs_dispatch(player, params, callback) {
+    function request_sqs_dispatch(player, params, callback, resolve, reject) {
 
         that.sendq['MessageBody'] = JSON.stringify({
             "params": [player, params],
-            "id": that.id + process.hrtime(),
+            "id": that.id,
             "version": "1.0",
             "method": "slim.request"
         }); // FIXME id not on pid but an uuid? for instrance from env?
@@ -233,20 +234,27 @@ function SqueezeRequest(address, port, username, password) {
                         }
 
                     } else {
-                        console.warn("no msgs ", err);
+                        //console.warn("no msgs ", err);
                         err = "No reply message recvied";
                     }
-
-                    handle(err, message_data, callback);
+                    handle(err, message_data, callback, resolve, reject);
                     request_sqs_dispatch_queue();
-                });
+		});
             }
         });
     }
 
     // We need to serialise requests and responces for queue use
-    // FIXME promise
     function request_sqs(player, params, callback) {
+
+        if (!callback) return new Promise( function(resolve, reject) {
+            if (that.reciving) {
+                 that.queue.push([player, params, callback, resolve,reject]);
+            } else {
+                 request_sqs_dispatch(player, params, callback,resolve,reject);
+            }
+        });
+
         if (that.reciving) {
             that.queue.push([player, params, callback]);
         } else {

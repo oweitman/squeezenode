@@ -147,7 +147,7 @@ function SqueezeServer(address, port, username, password, sa, sp) {
     this.getPlayers = function (callback) {
         if (callback) {
              self.request(defaultPlayer, ["players", 0, 100], function (reply) {
-                 if (reply.ok)
+                 if (reply.ok && 'players_loop' in  reply.result )
                      reply.result = reply.result.players_loop;
                      callback(reply);
              });
