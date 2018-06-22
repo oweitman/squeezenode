@@ -141,7 +141,7 @@ function SqueezeRequest(address, port, username, password) {
                     msg = reply.Messages.pop();
                  }
              }
-             request_sqs_dispatch_queue();
+             sqs_dispatch_queue();
           }); //Drain Q.
 
     } else {
@@ -183,14 +183,7 @@ function SqueezeRequest(address, port, username, password) {
         }
     }
 
-    /**
-     * Request function to use AWS SQS
-     *
-     * @param player The target player
-     * @param params Request parameters
-     * @param callback The function to call with the result
-     */
-    function request_sqs_dispatch(player, params, callback, resolve, reject) {
+    function sqs_dispatch(player, params, callback, resolve, reject) {
 
         that.sendq['MessageBody'] = JSON.stringify({
             "params": [player, params],
@@ -242,19 +235,34 @@ function SqueezeRequest(address, port, username, password) {
                         err = "No reply message recvied";
                     }
                     handle(err, message_data, callback, resolve, reject);
-                    request_sqs_dispatch_queue();
+                    sqs_dispatch_queue();
 		});
             }
         });
     }
 
-    // We need to serialise requests and responces for queue use
+    function sqs_dispatch_queue() {
+       var args = that.queue.pop();
+       if (args) {
+           sqs_dispatch.apply(null, args);
+       } else {
+           that.reciving = false;
+       }
+    }
+
+    /**
+     * Request function to use AWS SQS, We need to serialise requests for queue use
+     *
+     * @param player The target player
+     * @param params Request parameters
+     * @param callback The function to call with the result
+     */
     function request_sqs(player, params, callback) {
         if (!callback) return new Promise( function(resolve, reject) {
             if (that.reciving) {
                  that.queue.push([player, params, callback, resolve,reject]);
             } else {
-                 request_sqs_dispatch(player, params, callback,resolve,reject);
+                 sqs_dispatch(player, params, callback,resolve,reject);
             }
         });
 
@@ -262,15 +270,6 @@ function SqueezeRequest(address, port, username, password) {
             that.queue.push([player, params, callback]);
         } else {
             request_sqs_dispatch(player, params, callback);
-        }
-    }
-
-    function request_sqs_dispatch_queue() {
-        var args = that.queue.pop();
-        if (args) {
-            request_sqs_dispatch.apply(null, args);
-        } else {
-            that.reciving = false;
         }
     }
 }
