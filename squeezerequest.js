@@ -35,13 +35,14 @@ var AWS;
  * @param password sqs password = {send: "Queue URL, recv "Queue URL" }
  */
 function SqueezeRequest(address, port, username, password) {
-    // FIXME URI
+    // FIXME use URI standard
     this.address = (typeof address !== 'string') ? 'localhost' : address;
     this.port = (port !== undefined) ? port : 9000;
     this.username = username;
     this.password = password;
-    this.id = 'squeezenode.' + process.pid + '.' + process.hrtime();// FIXME lamba seems to be 1 always add instance?
+    this.id = 'squeezenode.' + process.pid + '.' + process.hrtime(); // FIXME lamba seems to be 1 always add instance?
     this.queue = [];
+    this.loop_limit = 100;
     var that = this;
 
     /**
@@ -88,14 +89,16 @@ function SqueezeRequest(address, port, username, password) {
 	    //localHost: ,
 	    keepAlive: true,
         }
+	// So we dont put the password in the logs...
+	console.log(tunnel_config);
 	var tp = decodeURIComponent(turl.password);
-	    console.log(tp);
         if (tp.substr(0,7) === 'file://') {
 	    tunnel_config['privateKey'] = require('fs').readFileSync(tp.substr(7));
         } else {
 	    tunnel_config['password'] = turl.password;
 	}
-	console.log(tunnel_config);
+	// FIXME add inline data key
+
         this.ssh_tunnel = Tunnel(tunnel_config, function(error, server) {
 	    if (error) {
 	            console.log(error);
@@ -107,6 +110,8 @@ function SqueezeRequest(address, port, username, password) {
             console.error('SSH Tunnel:', err);
 	    console.log('Tunnel error');
         });
+
+	// setup server object for tunnel use
 	this.address = surl.protocol+'//localhost';
 	this.port = fp;
 	console.log(surl);
@@ -147,7 +152,7 @@ function SqueezeRequest(address, port, username, password) {
         client = (this.address.substr(0, 5) === 'https') ? jayson.client.https(jsonrpc) : client = jayson.client.http(jsonrpc);
         client.options.version = 1;
 
-	// FIXME URL
+	// FIXME use URL standard
         // Add a header for basic authentication if a username and password are given
         if (username && password) {
             if (!client.options.headers)
@@ -185,7 +190,6 @@ function SqueezeRequest(address, port, username, password) {
      * @param params Request parameters
      * @param callback The function to call with the result
      */
-
     function request_sqs_dispatch(player, params, callback, resolve, reject) {
 
         that.sendq['MessageBody'] = JSON.stringify({
@@ -246,7 +250,6 @@ function SqueezeRequest(address, port, username, password) {
 
     // We need to serialise requests and responces for queue use
     function request_sqs(player, params, callback) {
-
         if (!callback) return new Promise( function(resolve, reject) {
             if (that.reciving) {
                  that.queue.push([player, params, callback, resolve,reject]);
