@@ -258,7 +258,7 @@ function SqueezeRequest(address, port, username, password) {
 
 function formatBasicHeader(username, password) {
     var tok = username + ':' + password;
-    var hash = new Buffer(tok).toString('base64');
+    var hash = new Buffer.from(tok).toString('base64');
     return "Basic " + hash;
 }
 
